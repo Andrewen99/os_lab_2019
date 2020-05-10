@@ -3,8 +3,6 @@ CFLAGS=-I.
 
 
 
-all: sequential_min_max parallel_min_max another_sequential
-
 another_sequential : main.c sequential_min_max
 	$(CC) -o ex5 main.c
 
@@ -20,5 +18,6 @@ utils.o : utils.h
 find_min_max.o : utils.h find_min_max.h
 	$(CC) -o find_min_max.o -c find_min_max.c $(CFLAGS)
 
+vse_dlya_tebya: sequential_min_max parallel_min_max another_sequential
 clean :
 	rm utils.o find_min_max.o sequential_min_max parallel_min_max

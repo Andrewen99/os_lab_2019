@@ -220,6 +220,7 @@ int main(int argc, char **argv)
     fscanf(file_max, "%d ", &max);
     fscanf(file_min, "%d ", &min);
 
+
     if (min < min_max.min)
       min_max.min = min;
     if (max > min_max.max)
