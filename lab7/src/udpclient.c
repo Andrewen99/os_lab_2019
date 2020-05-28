@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 
   //sendto - отправляет сообщения в сокет
   int sendint = 0;
-  while (sendint < 50) {
+  while (sendint < 99999) {
     snprintf(sendline, sizeof(sendline), "%d", sendint);
     printf("Sending to server= %s\n", sendline);
     if (sendto(sockfd, sendline, sizeof(sendline), 0, (SADDR *)&servaddr, SLEN) == -1) {
@@ -136,10 +136,12 @@ int main(int argc, char *argv[]) {
     memset(recvline, 0, sizeof(recvline));
     if (recvfrom(sockfd, recvline, buf_size, 0, NULL, NULL) == -1) {
       printf("no respond\n");
+      usleep(300);
     } else {
       printf("REPLY FROM SERVER= %s\n", recvline);
+      sleep(1);
     }
-    sleep(1);
+
     sendint++;
   }
   close(sockfd);

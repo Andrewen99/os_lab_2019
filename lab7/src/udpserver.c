@@ -78,6 +78,8 @@ int main(int argc, char *argv[]) {
     perror("socket problem");
     exit(1);
   }
+  int opt_val = 1;
+  setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt_val, 100);
 
   // struct timeval read_timeout;
   // read_timeout.tv_sec = 5;
@@ -129,18 +131,18 @@ int main(int argc, char *argv[]) {
     sendcount++;
 
     if (strcmp(mesg, sendline) == 0) {
-      sleep(5);
-      close(sockfd);
-      if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
-        perror("socket problem");
-        exit(1);
-      }
-
-      if (bind(sockfd, (SADDR *)&servaddr, SLEN) < 0) {
-        perror("bind problem");
-        exit(1);
-      }
-      snprintf(sendline, sizeof(sendline), "%d", 17);
+      sleep(10);
+      // close(sockfd);
+      // if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+      //   perror("socket problem");
+      //   exit(1);
+      // }
+      //
+      // if (bind(sockfd, (SADDR *)&servaddr, SLEN) < 0) {
+      //   perror("bind problem");
+      //   exit(1);
+      // }
+      snprintf(sendline, sizeof(sendline), "%d", 10);
     }
 
   }
