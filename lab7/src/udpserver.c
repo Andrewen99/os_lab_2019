@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
             argv[0]);
     return -1;
   }
-  char mesg[buf_size], ipadr[16];
+  char mesg[buf_size], ipadr[16], sendline[buf_size];
 
   // Сокет
   // AF_INET - IPv4 протокол Интернета
@@ -78,6 +78,11 @@ int main(int argc, char *argv[]) {
     perror("socket problem");
     exit(1);
   }
+
+  // struct timeval read_timeout;
+  // read_timeout.tv_sec = 5;
+  // read_timeout.tv_usec = 100;
+  // setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
 
   // заполняет первые СЛЕН байтов той области памяти, на которую указывает servaddr, постоянным байтом 0.
   //Функция htonl() преобразует узловой порядок расположения байтов положительного целого hostlong в сетевой порядок расположения байтов.
@@ -95,9 +100,10 @@ int main(int argc, char *argv[]) {
   }
   printf("SERVER starts...\n");
 
+  snprintf(sendline, sizeof(sendline), "%d", 5);
   while (1) {
+    int sendcount = 0;
     unsigned int len = SLEN;
-
     //Нету никакого канала соединения с клиентом, поэтому его адресс нужно запомнить
     //Системные вызовы recvfrom  используется для получения сообщений из сокета, и может использоваться
     // для получения данных, независимо от того, является ли сокет ориентированным на соединения или нет.
@@ -106,6 +112,7 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
     mesg[n] = 0;
+
 
     //Данная функция преобразует структуру сетевого адреса s_addr в строку символов с сетевым адресом (типа AF_INET),
     // которая затем копируется в символьный буфер !ipad pro!; размер этого буфера составляет 16 байтов.
@@ -119,6 +126,23 @@ int main(int argc, char *argv[]) {
       perror("sendto");
       exit(1);
     }
+    sendcount++;
+
+    if (strcmp(mesg, sendline) == 0) {
+      sleep(5);
+      close(sockfd);
+      if ((sockfd = socket(AF_INET, SOCK_DGRAM, 0)) < 0) {
+        perror("socket problem");
+        exit(1);
+      }
+
+      if (bind(sockfd, (SADDR *)&servaddr, SLEN) < 0) {
+        perror("bind problem");
+        exit(1);
+      }
+      snprintf(sendline, sizeof(sendline), "%d", 17);
+    }
+
   }
   close(sockfd);
 }

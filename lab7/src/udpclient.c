@@ -10,6 +10,15 @@
 #include <unistd.h>
 #include <getopt.h>
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>    // Needed for sockets stuff
+#include <netinet/in.h>   // Needed for sockets stuff
+#include <sys/socket.h>   // Needed for sockets stuff
+#include <arpa/inet.h>    // Needed for sockets stuff
+#include <fcntl.h>        // Needed for sockets stuff
+#include <netdb.h>        // Needed for sockets stuff
+
 #define VERBOSE
 #define SADDR struct sockaddr
 #define SLEN sizeof(struct sockaddr_in)
@@ -92,7 +101,7 @@ int main(int argc, char *argv[]) {
   // Сокет
   // AF_INET - IPv4 протокол Интернета
   //!!!!!!
-  // --!!!SOCK_STREAM!!! - Поддерживает датаграммы
+  // --!!!SOCK_DGRAM!!! - Поддерживает датаграммы
   // (ненадежные сообщения с ограниченной длиной и не поддерживающие соединения).
   // Что и делает вид транспортировки данных UPD
   //!!!!!
@@ -101,25 +110,37 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
+  int flags = fcntl(sockfd, F_GETFL, 0);
+  fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
+
+  // struct timeval read_timeout;
+  // read_timeout.tv_sec = 0;
+  // read_timeout.tv_usec = 10;
+  //setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &read_timeout, sizeof read_timeout);
+
   write(1, "Enter string\n", 13);
 
-  //sendto - отправляет сообщения в сокет  
-  while ((n = read(0, sendline, buf_size)) > 0) {
-    if (sendto(sockfd, sendline, n, 0, (SADDR *)&servaddr, SLEN) == -1) {
+  //sendto - отправляет сообщения в сокет
+  int sendint = 0;
+  while (sendint < 50) {
+    snprintf(sendline, sizeof(sendline), "%d", sendint);
+    printf("Sending to server= %s\n", sendline);
+    if (sendto(sockfd, sendline, sizeof(sendline), 0, (SADDR *)&servaddr, SLEN) == -1) {
       perror("sendto problem");
       exit(1);
     }
 
     // заполняем нулями реквлайн
-    //Системные вызовы recvfrom  используется для получения сообщений из сокета, и может использоваться
+    // Системные вызовы recvfrom  используется для получения сообщений из сокета, и может использоваться
     // для получения данных, независимо от того, является ли сокет ориентированным на соединения или нет.
     memset(recvline, 0, sizeof(recvline));
     if (recvfrom(sockfd, recvline, buf_size, 0, NULL, NULL) == -1) {
-      perror("recvfrom problem");
-      exit(1);
+      printf("no respond\n");
+    } else {
+      printf("REPLY FROM SERVER= %s\n", recvline);
     }
-
-    printf("REPLY FROM SERVER= %s\n", recvline);
+    sleep(1);
+    sendint++;
   }
   close(sockfd);
 }
